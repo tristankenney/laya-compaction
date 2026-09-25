@@ -8,8 +8,8 @@ import type {
   TurnCompleteInput,
 } from 'claude-code';
 
-import { compact, reductionRatio, resolveOptions } from 'fast-jev-compaction';
-import { buildJevRequest, DEFAULT_MODEL, parseJevResponse } from 'fast-jev-compaction';
+import { compact, reductionRatio, resolveOptions } from '../src/compact.js';
+import { buildJevRequest, DEFAULT_MODEL, parseJevResponse } from '../src/request.js';
 import type {
   CompactOptions,
   CompactResult,
@@ -17,7 +17,7 @@ import type {
   Message,
   ToolResult,
   ToolUse,
-} from 'fast-jev-compaction';
+} from '../src/types.js';
 
 const HOOK_DEFAULTS = {
   compactAtPercent: 60,

@@ -12,5 +12,6 @@
       "version": "0.1.0",
       "license": "MIT"
     }
-  ]
+  ],
+  "description": "Verbatim, locally-scored context compaction for Claude Code."
 }

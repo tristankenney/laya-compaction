@@ -64,5 +64,9 @@
       "description": "Full URL of the decision endpoint. Point at a local Laya server (http://127.0.0.1:8787/ask) to keep every request on this machine. Unset falls back to the hosted TypeSafe endpoint, which requires an API key.",
       "default": "http://127.0.0.1:8787/ask"
     }
+  },
+  "author": {
+    "name": "Tristan Kenney",
+    "url": "https://github.com/tristankenney"
   }
 }
