@@ -83,7 +83,10 @@ def make_handler(service):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Serve Laya typed decisions over HTTP")
-    parser.add_argument("--model", default="aac6fef/laya-multilingual-mlx")
+    # laya-mlx's own DEFAULT_MODELS publishes convaiinnovations/laya; the
+    # upstream server.py defaulted to a third-party mirror instead.
+    parser.add_argument("--model", default="convaiinnovations/laya")
+    parser.add_argument("--subfolder", default="multilingual")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--dtype", default="float16", choices=["float16", "float32", "bfloat16"])
@@ -91,7 +94,13 @@ def main(argv=None):
     parser.add_argument("--device", default=None, choices=[None, "gpu", "metal", "cpu"])
     args = parser.parse_args(argv)
 
-    agent = load(args.model, dtype=args.dtype, batch_size=args.batch_size, device=args.device)
+    agent = load(
+        args.model,
+        subfolder=args.subfolder,
+        dtype=args.dtype,
+        batch_size=args.batch_size,
+        device=args.device,
+    )
     server = ThreadingHTTPServer((args.host, args.port), make_handler(DecisionService(agent)))
     print(f"laya decision server on http://{args.host}:{args.port} ({args.model})", flush=True)
     try:

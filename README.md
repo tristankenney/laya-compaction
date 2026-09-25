@@ -46,18 +46,27 @@ hosted endpoint instead.
 
 ## Status
 
-Unproven. The transport is verified — a stub server on localhost round-trips
-`buildJevRequest` → `parseJevResponse` correctly — but two things have not been
-measured against a real Laya:
+Working end to end against a real local Laya. Measured on an Apple M5,
+`convaiinnovations/laya` (multilingual), three `noul` questions per request:
 
-- **Threshold calibration.** `keepThreshold` defaults to 0.5 against *Jev's*
-  calibration. If Laya's probabilities run colder, context gets dropped that
-  should have been kept, silently. Measure before trusting it.
-- **Latency at a 25k-token state.** The published 7–15 ms figures are for short
-  decisions; this resends full state per request.
+- **Latency: 15 ms warm.** First call is ~2 s of model warmup, then 15 ms for
+  three questions — matching the published 7-15 ms. Not a concern.
+- **Calibration: do not leave `keepThreshold` at 0.5.** Laya ranks correctly
+  but its probabilities are compressed around 0.5, not spread like Jev's.
+  One probe set, same state:
 
-## Credits
+  | probe | noul |
+  |---|---|
+  | relevant (Read of the file under test) | 0.643 |
+  | irrelevant (LS /tmp, 12k chars) | 0.554 |
+  | absurd (echo hello, 200 turns ago, unrelated) | 0.347 |
 
-Derived from two MIT projects, notices retained in `LICENSE.upstream` and
-`LICENSE.laya-port`: the hook from tamaratran/fast-jev-compaction, `server.py`
-from kaiyes/fast-jev-compaction-laya.
+  The ordering is right, but at the default 0.5 the *irrelevant* result is
+  kept. Around 0.6 separates them here. Absolute values also move a lot with
+  question wording and state — an earlier probe set scored 0.90-0.97 across
+  the board — so treat the threshold as something to tune against your own
+  transcripts, not a constant to copy from this table.
+
+Untested: whether tuning `keepThreshold` yields a useful reduction ratio on a
+real session without dropping something that mattered. That is the question
+this repo exists to answer, and it is not answered yet.
