@@ -1,0 +1,68 @@
+{
+  "name": "laya-compaction",
+  "version": "0.1.0",
+  "description": "Verbatim context compaction for Claude Code, scored by a local Laya model.",
+  "license": "MIT",
+  "userConfig": {
+    "apiKey": {
+      "type": "string",
+      "title": "TypeSafe API key",
+      "description": "Only needed for the hosted TypeSafe endpoint. A local Laya server ignores it.",
+      "sensitive": true
+    },
+    "keepThreshold": {
+      "type": "number",
+      "title": "Keep threshold",
+      "description": "Minimum Jev probability that a tool call or tool result is still needed; below it the item is removed.",
+      "default": 0.5
+    },
+    "preserveRecentMessages": {
+      "type": "number",
+      "title": "Recent messages to preserve",
+      "description": "Number of newest messages pinned from compaction.",
+      "default": 6
+    },
+    "compactAtPercent": {
+      "type": "number",
+      "title": "Compaction percentage",
+      "description": "Context percentage at which turn.complete requests compaction.",
+      "default": 60
+    },
+    "minReductionRatio": {
+      "type": "number",
+      "title": "Minimum reduction ratio",
+      "description": "Minimum estimated character reduction required to replace history.",
+      "default": 0.25
+    },
+    "maxStateTokens": {
+      "type": "number",
+      "title": "Maximum Jev state tokens",
+      "description": "Estimated token budget for the conversation state sent with every Jev request.",
+      "default": 25000
+    },
+    "maxRequestTokens": {
+      "type": "number",
+      "title": "Maximum Jev request tokens",
+      "description": "Estimated token budget for state plus questions in one Jev request.",
+      "default": 30000
+    },
+    "truncateHeadChars": {
+      "type": "number",
+      "title": "Truncated tool result head",
+      "description": "Characters of a tool result kept when Jev decides its full output is no longer needed; 0 keeps only the note.",
+      "default": 300
+    },
+    "model": {
+      "type": "string",
+      "title": "Jev model",
+      "description": "TypeSafe Jev model name.",
+      "default": "laya"
+    },
+    "baseUrl": {
+      "type": "string",
+      "title": "Decision endpoint",
+      "description": "Full URL of the decision endpoint. Point at a local Laya server (http://127.0.0.1:8787/ask) to keep every request on this machine. Unset falls back to the hosted TypeSafe endpoint, which requires an API key.",
+      "default": "http://127.0.0.1:8787/ask"
+    }
+  }
+}

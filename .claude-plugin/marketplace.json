@@ -1,0 +1,16 @@
+{
+  "name": "laya-compaction",
+  "owner": {
+    "name": "tristankenney",
+    "url": "https://github.com/tristankenney"
+  },
+  "plugins": [
+    {
+      "name": "laya-compaction",
+      "source": "./",
+      "description": "Verbatim context compaction for Claude Code, scored by a local Laya model.",
+      "version": "0.1.0",
+      "license": "MIT"
+    }
+  ]
+}
