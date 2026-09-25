@@ -40,6 +40,15 @@ pip install laya-mlx            # Apple Silicon; ~650 MB checkpoint on first run
 python server.py                # http://127.0.0.1:8787 — keep it running
 ```
 
+Run it as a launchd service instead of a terminal you have to remember:
+
+```sh
+./launchd/install.sh     # renders the plist, bootstraps the agent
+```
+
+It starts at login, respawns if it dies, and logs to `~/.laya/logs/`. Remove
+with `launchctl bootout gui/$UID/com.laya.decisions`.
+
 Then install the plugin and leave `baseUrl` at its default
 (`http://127.0.0.1:8787/ask`). Set `apiKey` only if you deliberately want the
 hosted endpoint instead.
