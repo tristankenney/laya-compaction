@@ -53,29 +53,44 @@ Then install the plugin and leave `baseUrl` at its default
 (`http://127.0.0.1:8787/ask`). Set `apiKey` only if you deliberately want the
 hosted endpoint instead.
 
-## Status
+## Status: does not work. Do not enable.
 
-Working end to end against a real local Laya. Measured on an Apple M5,
-`convaiinnovations/laya` (multilingual), three `noul` questions per request:
+Measured against a realistic 100-tool-call transcript (200 noul questions) on
+an Apple M5, `convaiinnovations/laya` multilingual. The transport is fine; the
+decisions are not.
 
-- **Latency: 15 ms warm.** First call is ~2 s of model warmup, then 15 ms for
-  three questions — matching the published 7-15 ms. Not a concern.
-- **Calibration: do not leave `keepThreshold` at 0.5.** Laya ranks correctly
-  but its probabilities are compressed around 0.5, not spread like Jev's.
-  One probe set, same state:
+**Laya does not discriminate on this task.** Half the tool calls were junk
+(`LS /tmp`), half were relevant (`Read src/auth*.ts`) for a stated goal of
+fixing auth tests. It scored them the same, and the junk marginally *higher*:
 
-  | probe | noul |
-  |---|---|
-  | relevant (Read of the file under test) | 0.643 |
-  | irrelevant (LS /tmp, 12k chars) | 0.554 |
-  | absurd (echo hello, 200 turns ago, unrelated) | 0.347 |
+| calls | mean keepResult | sd |
+|---|---|---|
+| junk `LS /tmp` (n=50) | 0.9282 | 0.0128 |
+| relevant `Read src/auth*.ts` (n=47) | 0.9157 | 0.0074 |
 
-  The ordering is right, but at the default 0.5 the *irrelevant* result is
-  kept. Around 0.6 separates them here. Absolute values also move a lot with
-  question wording and state — an earlier probe set scored 0.90-0.97 across
-  the board — so treat the threshold as something to tune against your own
-  transcripts, not a constant to copy from this table.
+Separation **-0.0125**, inside the noise. Every one of 200 decisions landed in
+0.93-0.97. At `keepThreshold` 0.6 or 0.8 nothing is dropped and reduction is
+0%; at 0.95 it drops 56 calls and reports 55% reduction, but that is slicing
+through a 4-point band of noise, so it discards context at random. That is
+worse than no compaction: silent, arbitrary loss.
 
-Untested: whether tuning `keepThreshold` yields a useful reduction ratio on a
-real session without dropping something that mattered. That is the question
-this repo exists to answer, and it is not answered yet.
+Shrinking the state does not help — it saturates instead. With a 40-message
+state every answer comes back `noul: 1.0, confidence: 1.0`.
+
+**Context window mismatch, which is real but not the cure.** The model's
+window is 8192 tokens (`max_position_embeddings`, and the tokenizer agrees)
+while the plugin defaults to `maxStateTokens: 25000` — 3x over, so the state is
+truncated. Fitting under the window is impossible for a long transcript anyway:
+the library's own fitting bottoms out at ~5775 tokens, leaving ~2400 for
+questions, and splitting to fit produces concurrent requests that the server
+serialises behind one lock.
+
+**Latency.** ~8.3 s per compaction of 200 questions, warm. Earlier notes in
+this repo claimed 15 ms; that was 3 questions against a 2-message state and
+did not predict anything. The `BrokenPipeError`s in `~/.laya/logs/laya.err.log`
+are Claude Code abandoning the dispatch and hanging up mid-response.
+
+**Conclusion.** The idea is sound and the plumbing works — a local decision
+model scoring a Jev-shaped request, no data leaving the machine. This
+particular model cannot make the judgement. Reviving this needs a decision
+model that discriminates on relevance at transcript scale, not a threshold.
